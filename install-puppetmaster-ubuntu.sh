@@ -2,15 +2,20 @@
 
 set -e
 
+# sanity checks
 if [ "$(id -u)" != "0" ]; then
   echo "Please run script as root." >&2
   exit 1
 fi
 if [ ! -r /etc/lsb-release ]; then
-  echo "Cannot determine distribution codename."
+  echo "Cannot determine distribution codename." >&2
   exit 1
 else
   . /etc/lsb-release
+fi
+if [ $(grep MemTotal /proc/meminfo | awk '{print $2}') -lt 4000000 ]; then
+  echo "Please configure server with minimum 4GB RAM." >&2
+  exit 1
 fi
 
 # make sure everything is current
