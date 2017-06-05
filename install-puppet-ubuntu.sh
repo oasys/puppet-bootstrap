@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# install puppet on a base ubuntu box
+
 set -e
 
 # sanity checks
