@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# install puppet on a base ubuntu box
+# install puppet-agent on a base ubuntu box
 
 set -e
 
@@ -31,7 +31,7 @@ wget -O "$tmpdir" "http://apt.puppetlabs.com/puppetlabs-release-pc1-${DISTRIB_CO
 dpkg -i "$tmpdir" >/dev/null
 apt-get update >/dev/null
 
-echo "Install puppet..."
-DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install puppet >/dev/null
+echo "Install puppet agent..."
+DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install puppet-agent >/dev/null
 
 echo "Finished."
