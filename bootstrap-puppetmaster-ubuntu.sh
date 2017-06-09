@@ -23,6 +23,7 @@ puppet apply puppetserver.pp
 echo "Adding host keys for $HOST to known_hosts..."
 ssh-keyscan $HOST >> /root/.ssh/known_hosts
 
+# set up deploy key
 echo "Generating r10k ssh key..."
 if [ -r ${KEYFILE}.pub ] ; then
   echo "Key exists, checking..."
@@ -50,9 +51,10 @@ else
   FACTER_token="$TOKEN" \
   FACTER_keyfile="${KEYFILE}.pub" \
   FACTER_provider="$PROVIDER" \
-  puppet apply --debug --modulepath=$MODPATH deploy_key.pp
+  puppet apply --modulepath=$MODPATH deploy_key.pp
 fi
 
+# deploy control repo
 echo "Installing r10k..."
 puppet module install --modulepath=$MODPATH puppet/r10k --version 6.0.0
-FACTER_pubkey=$(cat ${KEYFILE}.pub) puppet apply --modulepath=$MODPATH r10k.pp
+FACTER_remote="$REMOTE" puppet apply --modulepath=$MODPATH r10k.pp
