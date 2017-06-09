@@ -58,3 +58,11 @@ fi
 echo "Installing r10k..."
 puppet module install --modulepath=$MODPATH puppet/r10k --version 6.0.0
 FACTER_remote="$REMOTE" puppet apply --modulepath=$MODPATH r10k.pp
+
+# add webhook
+echo "Installing webhook..."
+FACTER_host="$HOST" \
+FACTER_repo="$REPO" \
+FACTER_token="$TOKEN" \
+FACTER_provider="$PROVIDER" \
+puppet apply --modulepath=$MODPATH webhook.pp
