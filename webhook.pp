@@ -1,16 +1,16 @@
 # set up local webhook service and deploy integration on git server
 
-class {'r10k::webhook':
-  use_mcollective => false,
-  user            => root,
-  group           => 0,
-}
-->
 class {'r10k::webhook::config':
   use_mcollective => false,
   enable_ssl      => false,
   protected       => true,
   notify          => Service['webhook'],
+}
+->
+class {'r10k::webhook':
+  use_mcollective => false,
+  user            => root,
+  group           => 0,
 }
 
 git_webhook { 'post_receive_webhook':
