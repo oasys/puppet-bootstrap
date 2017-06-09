@@ -9,13 +9,17 @@ KEYFILE=/root/.ssh/r10k_rsa
 mkdir -p $MODPATH
 
 #validate input
-echo $1 | grep -q '^git@' || (echo "Please supply repo on commandline. (example: $0 git@github.com/orgname/puppet-control)" >&2; exit 1)
+REMOTE="$1"
+TOKEN="$2"
+echo $REMOTE | grep -q '^git@' || (echo "Please supply repo on commandline. (example: $0 git@github.com/orgname/puppet-control [token])" >&2; exit 1)
 
 echo "Installing puppetserver..."
 puppet apply puppetserver.pp
 
 # genkey
-[[ $1 =~ @([^/:]+)[/:] ]] && HOST="${BASH_REMATCH[1]}"
+[[ $REMOTE =~ @([^/:]+)[/:] ]] && HOST="${BASH_REMATCH[1]}"
+[[ $REMOTE =~ .*[/:](.+/[^.]+)(.git)? ]] && REPO="${BASH_REMATCH[1]}"
+[[ $REMOTE =~ gitlab ]] && PROVIDER='gitlab' || PROVIDER=git
 echo "Adding host keys for $HOST to known_hosts..."
 ssh-keyscan $HOST >> /root/.ssh/known_hosts
 
@@ -33,9 +37,21 @@ Host $HOST
   User git
   IdentityFile $KEYFILE
 EOM
-echo "Please give the following pubkey RO access to the repo, then hit <enter>."
-cat ${KEYFILE}.pub
-read
+
+if [ -z "$TOKEN" ]; then
+  echo "Please give the following pubkey RO access to the repo, then hit <enter>."
+  cat ${KEYFILE}.pub
+  read
+else
+  echo "Adding the deploy key to the repo..."
+  puppet module install --modulepath=$MODPATH abrader/gms --version 1.0.3
+  FACTER_host="$HOST" \
+  FACTER_repo="$REPO" \
+  FACTER_token="$TOKEN" \
+  FACTER_keyfile="${KEYFILE}.pub" \
+  FACTER_provider="$PROVIDER" \
+  puppet apply --debug --modulepath=$MODPATH deploy_key.pp
+fi
 
 echo "Installing r10k..."
 puppet module install --modulepath=$MODPATH puppet/r10k --version 6.0.0
